@@ -183,6 +183,8 @@ We tested with :
 
 Those trials showed us that here, the simpler the architecture is the better it performs.
 
+
+
 > analysis of this shallow network from raw data :
 
 We obtained a loss value for the test of 0.062 and an accuracy of 98.2 % for the selected model:
@@ -195,11 +197,14 @@ Here is the results of the first try :
 
 ![image]
 ![image]
-
+![image]
 
 
 Here is the results of the second try :
 
+![image]
+![image]
+![image]
 
 
 
@@ -207,11 +212,10 @@ Here is the results of the second try :
 ### Shallow network from features of the input data
 
 > Neural network topology (architecture) :
-The inputs in our neural network are this time the size of the vector computed by the feature extraction method I.E. history of gradient. We end up with 392 features this time.
 
-The history of gradient is a feature extraction method that can be interpreted similarly to CNN as a sliding window along the original data. It computes the gradient I.E. a discrete derivative in the case of a matrix of pixels. The different gradient are the sorted according their angles and magnitudes.
+The inputs in our neural network are this time the size of the vector computed by the feature extraction method I.E. history of gradient. We end up with 1568 features this time for our final configuration.
 
-The method is well suited for edge detection and was originally designed for pedestrian detection.
+The history of gradient is a feature extraction method that can be interpreted similarly to CNN as a sliding window along the original data. It computes the gradient I.E. a discrete derivative in the case of a matrix of pixels. The different gradient are the sorted according their angles and magnitudes. The method is well suited for edge detection and was originally designed for pedestrian detection.
 
 We have again 60k entries for the train set and 10k for the test set. Each record are split into 10 classes. Again each of them being a representation of a digit 0 to 9.
 
@@ -219,13 +223,63 @@ The dataset seems to be relatively well balanced. We have min 5421 items for the
 
 > Number of weights :
 
+For our selected configuration we have the following parameters :
+1568(features) * 180(hidden neurons) + 180(for each biais) = 282 420
+180(hidden neurons) * 10 (output) + 10(each biais) = 1810
+finally we sum up : 1810 + 282 420 = 284 230
 
 > Test of different cases :
 
+We began with no dropout and same architecture as the best mentioned above model.
+We kicked off by tweaking the number of orientation and pix per cell parameters in the HOG algorithm. The idea was to extract more features affording the risk of overfitting.
+
+As we can see in the plot below, we experienced overfitting in the first trial. The train set is progressing well but on the test set the model is going astray. We noticed a significant time consuming training for this configuration.
+
+N orientations = 12
+
+pix per cell = 2
+
+We obtained an accuracy of 98 % not too ugly
+
+![image](assets/hog_12_2_plot.png)
+![image](assets/hog_12_2_matrix.png)
+
+Next experiment we decided to go in the opposite direction. If we are too high in resolution with the number of angles and too low in the pixel per windows, we will be trying to mitigate this effect by setting the following :
+
+N orientations = 6
+
+pix per cell = 4
+
+We obtained an accuracy of 98 %
+
+![image](assets/hog_6_4_no_drop_plot.png)
+![image](assets/hog_6_4_no_drop_matrix.png)
+
+We obtained almost the same accuracy with less features so we assumed the design is better. We decided to go further setting the dropout layer at 0.5.
 
 
 
-> analysis of this shallow network from features :
+After a couple of different experiments we decided to retain the following architecture :
+
+N orientation = 8
+
+pix per cell = 4
+
+We obtained an accuracy of 98.3 %
+
+![image](assets/hog_8_2_drop_model.png)
+![image](assets/hog_8_2_plot_drop.png)
+![image](assets/hog_8_2_matrix_drop.png)
+
+We think we came to a reasonable balance between the number of features (N orientations and pix per cell) with the design of our MLP including dropout. We tried different numbers of neurons in the hidden layer but it did not aid our model to generalize in a more accurate way.
+
+In the confusion matrices we can notice we got the following digit frequently confused:
+
+* 3 and 5, 13 times
+* 3 and 9, 7 times
+* 2 and 7, 7 times
+
+We suppose those digits can look similar therefore can easily be mistaken. The HOG is supposed to be sensitive to contrast (gradient) so if some digits have to same sensitivity areas as others they will be confused. It would be interesting to compare HOG with SIFT and a sobel filter in a CNN.
 
 
 ### CNN neural network for digit recognition
