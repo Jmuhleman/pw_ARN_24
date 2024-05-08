@@ -152,10 +152,17 @@ The inputs in our neural network are each of the pixels of the MNNIST dataset I.
 
 We have 60k entries for the train set and 10k for the test set. Each record are split into 10 classes. Each of them being a representation of a digit 0 to 9.
 
-
+The dataset seems to be relatively well balanced. We have min 5421 items for the less represented class (digit 5) and 6742 item for the most represented (digit 1)
 
 > Number of weights :
 
+We have 784 input neurons
+We have 255 neurons in the hidden layer
+We have 10 output nuerons
+
+We multiply 784 * 255 + 255 (for each biais) = 200 655
+We have 255 * 10 + 10(for each biais) = 2560
+Then add them up = 200 655 + 2560 = 203 215 weights overall
 
 > Test of different cases :
 
