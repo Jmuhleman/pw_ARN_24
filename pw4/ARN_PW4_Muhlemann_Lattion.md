@@ -148,11 +148,35 @@ w_{t+1} = w_t - \eta \cdot \frac{g_t}{\sqrt{v_{t+1}} + \epsilon}
 
 > Neural network topology (architecture) :
 
+The inputs in our neural network are each of the pixels of the MNNIST dataset I.E. 28*28 = 784 entry neurons.
+
+We have 60k entries for the train set and 10k for the test set. Each record are split into 10 classes. Each of them being a representation of a digit 0 to 9.
+
+
 
 > Number of weights :
 
 
 > Test of different cases :
+
+After several experiments we decided to go for the following topology with a _relu_ activation on the output layer:
+![image](assets/raw_topology.png)
+
+This topology allows us to reach an accuracy of about 98.3%
+
+We tested with :
+
+    - no dropout layer  -> 98 %
+    - with 300 neurons in the hidden layer -> 97.8 %
+    - with dropout 0.3 -> 98 %
+    - with tanh activation on the output layer -> 97.7 %
+    - with 240 neurons in the hidden layer -> 98.2 %
+
+Those trials showed us that here, the simpler the architecture is the better it performs.
+
+
+
+
 
 
 > analysis of this shallow network from raw data :
