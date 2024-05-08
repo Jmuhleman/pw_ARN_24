@@ -21,7 +21,7 @@ la validation est instable. (explication des graphes en dents de scie)
 
 ## Overall description
 
-# TODO control the responses and reformat everything !!!!!!
+# !!!!TODO control the responses and reformat everything !!!!!!
 
 
 
@@ -160,9 +160,9 @@ We have 784 input neurons
 We have 255 neurons in the hidden layer
 We have 10 output nuerons
 
-We multiply 784 * 255 + 255 (for each biais) = 200 655
+We multiply 784 * 255 + 255 (for each biais) = 200 175
 We have 255 * 10 + 10(for each biais) = 2560
-Then add them up = 200 655 + 2560 = 203 215 weights overall
+Then add them up = 200 175 + 2560 = 202 735 weights overall
 
 > Test of different cases :
 
@@ -173,6 +173,8 @@ This topology allows us to reach an accuracy of about 98.3%
 
 We tested with :
 
+#!!!TODO ajouter les graphes des configs qui ne marchent pas !!!
+
     - no dropout layer  -> 98 %
     - with 300 neurons in the hidden layer -> 97.8 %
     - with dropout 0.3 -> 98 %
@@ -181,18 +183,39 @@ We tested with :
 
 Those trials showed us that here, the simpler the architecture is the better it performs.
 
-
-
-
-
-
 > analysis of this shallow network from raw data :
+
+We obtained a loss value for the test of 0.062 and an accuracy of 98.2 % for the selected model:
+
+![image](assets/raw_plot.png)
+
+![image](assets/raw_matrix.png)
+
+Here is the results of the first try :
+
+![image]
+![image]
+
+
+
+Here is the results of the second try :
+
+
+
 
 
 ### Shallow network from features of the input data
 
 > Neural network topology (architecture) :
+The inputs in our neural network are this time the size of the vector computed by the feature extraction method I.E. history of gradient. We end up with 392 features this time.
 
+The history of gradient is a feature extraction method that can be interpreted similarly to CNN as a sliding window along the original data. It computes the gradient I.E. a discrete derivative in the case of a matrix of pixels. The different gradient are the sorted according their angles and magnitudes.
+
+The method is well suited for edge detection and was originally designed for pedestrian detection.
+
+We have again 60k entries for the train set and 10k for the test set. Each record are split into 10 classes. Again each of them being a representation of a digit 0 to 9.
+
+The dataset seems to be relatively well balanced. We have min 5421 items for the less represented class (digit 5) and 6742 item for the most represented (digit 1)
 
 > Number of weights :
 
