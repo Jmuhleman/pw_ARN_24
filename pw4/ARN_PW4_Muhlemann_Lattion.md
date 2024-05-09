@@ -330,7 +330,7 @@ Test accuracy: 0.9063000082969666
 ```
 
 <div style="text-align:center">
-    <img src="./assets/CNN_8_Neurones.png" alt="CNN_8_Neurones.png" style="width: 100%;">
+    <img src="./assets/CNN_8_Neurones.png" alt="CNN_8_Neurones.png" style="width: 80%;">
 </div>
 <div style="text-align:center">
     <img src="./assets/CNN_Architecture_final.png" alt="CNN_Architecture_final.png" style="width: 80%;">
