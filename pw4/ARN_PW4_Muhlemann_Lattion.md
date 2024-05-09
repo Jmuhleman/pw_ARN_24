@@ -167,7 +167,10 @@ Then add them up = 200 175 + 2560 = 202 735 weights overall
 > Test of different cases :
 
 After several experiments we decided to go for the following topology with a _relu_ activation on the output layer:
-![image](assets/raw_topology.png)
+
+<div style="text-align:center">
+    <img src="./assets/raw_topology.png" alt="raw_topology.png" style="width: 90%;">
+</div>
 
 This topology allows us to reach an accuracy of about 98.3%
 
@@ -189,9 +192,13 @@ Those trials showed us that here, the simpler the architecture is the better it 
 
 We obtained a loss value for the test of 0.062 and an accuracy of 98.2 % for the selected model:
 
-![image](assets/raw_plot.png)
+<div style="text-align:center">
+    <img src="./assets/raw_plot.png" alt="raw_plot.png" style="width: 90%;">
+</div>
 
-![image](assets/raw_matrix.png)
+<div style="text-align:center">
+    <img src="./assets/raw_matrix.png" alt="raw_matrix.png" style="width: 90%;">
+</div>
 
 Here is the results of the first try :
 
@@ -241,8 +248,13 @@ pix per cell = 2
 
 We obtained an accuracy of 98 % not too ugly
 
-![image](assets/hog_12_2_plot.png)
-![image](assets/hog_12_2_matrix.png)
+<div style="text-align:center">
+    <img src="./assets/hog_12_2_plot.png" alt="hog_12_2_plot.png" style="width: 90%;">
+</div>
+
+<div style="text-align:center">
+    <img src="./assets/hog_12_2_matrix.png" alt="hog_12_2_matrix.png" style="width: 90%;">
+</div>
 
 Next experiment we decided to go in the opposite direction. If we are too high in resolution with the number of angles and too low in the pixel per windows, we will be trying to mitigate this effect by setting the following :
 
@@ -252,8 +264,12 @@ pix per cell = 4
 
 We obtained an accuracy of 98 %
 
-![image](assets/hog_6_4_no_drop_plot.png)
-![image](assets/hog_6_4_no_drop_matrix.png)
+<div style="text-align:center">
+    <img src="./assets/hog_6_4_no_drop_plot.png" alt="hog_6_4_no_drop_plot.png" style="width: 90%;">
+</div>
+<div style="text-align:center">
+    <img src="./assets/hog_6_4_no_drop_matrix.png" alt="hog_6_4_no_drop_matrix.png" style="width: 90%;">
+</div>
 
 We obtained almost the same accuracy with less features so we assumed the design is better. We decided to go further setting the dropout layer at 0.5.
 
@@ -267,9 +283,15 @@ pix per cell = 4
 
 We obtained an accuracy of 98.3 %
 
-![image](assets/hog_8_2_drop_model.png)
-![image](assets/hog_8_2_plot_drop.png)
-![image](assets/hog_8_2_matrix_drop.png)
+<div style="text-align:center">
+    <img src="./assets/hog_8_2_drop_model.png" alt="hog_8_2_drop_model.png" style="width: 90%;">
+</div>
+<div style="text-align:center">
+    <img src="./assets/hog_8_2_plot_drop.png" alt="hog_8_2_plot_drop.png" style="width: 90%;">
+</div>
+<div style="text-align:center">
+    <img src="./assets/hog_8_2_matrix_drop.png" alt="hog_8_2_matrix_drop.png" style="width: 90%;">
+</div>
 
 We think we came to a reasonable balance between the number of features (N orientations and pix per cell) with the design of our MLP including dropout. We tried different numbers of neurons in the hidden layer but it did not aid our model to generalize in a more accurate way.
 
@@ -306,7 +328,13 @@ Initial architecture
 Test score: 0.31283387541770935
 Test accuracy: 0.9063000082969666
 ```
-![CNN_8_Neurones](./assets/CNN_8_Neurones.png)
+
+<div style="text-align:center">
+    <img src="./assets/CNN_8_Neurones.png" alt="CNN_8_Neurones.png" style="width: 100%;">
+</div>
+<div style="text-align:center">
+    <img src="./assets/CNN_Architecture_final.png" alt="CNN_Architecture_final.png" style="width: 80%;">
+</div>
 
 ```
 array([[ 952,    1,    2,    1,    3,    0,   14,    1,    6,    0],
@@ -328,7 +356,10 @@ array([[ 952,    1,    2,    1,    3,    0,   14,    1,    6,    0],
 Test score: 0.10416335612535477
 Test accuracy: 0.9656000137329102
 ```
-![CNN_20_epochs.png](./assets/CNN_20_epochs.png)
+
+<div style="text-align:center">
+    <img src="./assets/CNN_20_epochs.png" alt="CNN_20_epochs.png" style="width: 80%;">
+</div>
 
 ```
 array([[ 972,    0,    3,    0,    0,    0,    3,    1,    1,    0],
