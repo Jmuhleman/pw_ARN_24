@@ -8,12 +8,6 @@
 
 
 
-dernière partie:
-```
-- ne pas chercher à améliorer le F1
-- mentionner que le set de validation ne dispose que de 18 observations et donc qu'à chaque déviation
-la validation est instable. (explication des graphes en dents de scie)
-```
 ## Introduction
 
 
@@ -21,25 +15,13 @@ la validation est instable. (explication des graphes en dents de scie)
 
 ## Overall description
 
-# !!!!TODO control the responses and reformat everything !!!!!!
-
 
 
 > What is the learning algorithm being used to optimize the weights of the neural networks?
 
-The learning algorithm used in the various experiences are :
+The learning algorithm used in all three experiences is root mean square propagation (RMSprop) :
 
-Notebook A
-Learning Algorithm: Stochastic Gradient Descent (SGD)
-A commonly used optimization algorithm for training neural networks. It updates the model's weights by computing gradients of the loss function with respect to the weights and then applying a step in the opposite direction.
-
-Notebook B
-Learning Algorithm: Adam (Adaptive Moment Estimation)
-Adam combines the benefits of Adaptive Gradient Algorithm (AdaGrad) and Root Mean Square Propagation (RMSProp). It uses adaptive learning rates and momentum to optimize the weights, resulting in faster convergence.
-
-Notebook C
-Learning Algorithm: RMSProp
-RMSProp is an adaptive learning algorithm that adjusts the learning rate based on the average of recent gradients. This helps to mitigate the oscillations and stabilizes the training process.
+An adaptive learning rate optimizer. It maintains a moving average of the squares of gradients and adjusts the learning rate accordingly. This helps prevent large gradients from causing instability during training. It handles noisy gradients well and according to our researches it can converge faster than stochastic gradient descent.
 
 > What are the parameters (arguments) being used by that algorithm?
 
@@ -47,88 +29,15 @@ The following parameters had been used for each algorithms :
 
 
 
-Notebook A
-RMSprop Parameters
-lr (Learning Rate): Controls the size of the steps taken during optimization. Commonly between 0.001 and 0.01.
-rho: Decay rate for the moving average of squared gradients. Usually around 0.9.
-eps (Epsilon): Small constant to avoid division by zero; typically 1e-8 or similar.
-weight_decay: Regularization parameter; often 0 or a small value like 1e-4.
-momentum: Adds momentum to the optimizer; typical values are 0 or 0.9.
-Loss Function
-Cross-Entropy Loss: Typically used for classification tasks. Measures dissimilarity between predicted output and actual target.
-
-
-Notebook B
-RMSprop Parameters
-Similar to Notebook A, with some variations:
-lr: Typically 0.001 to 0.01.
-rho: Generally 0.9.
-eps: Around 1e-8.
-weight_decay: Often 0 or another small value.
-momentum: Typically 0 or 0.9.
-Loss Function
-If dealing with a regression task, a common choice is:
-Mean Squared Error (MSE): Calculates the average of squared differences between predicted and actual values.
-
-
-Notebook C
-RMSprop Parameters
-Usually consistent with A and B, with possible variations for specific tasks:
-lr: Often between 0.001 and 0.01.
-rho: Generally around 0.9.
-eps: Usually 1e-8 or similar.
-weight_decay: Typically 0.
-momentum: Often 0.
-Loss Function
-In mixed tasks or where outliers are a concern, a common choice is:
-Huber Loss: A combination of MSE and Mean Absolute Error (MAE), providing robustness to outliers with smoother gradients.
-
-
 
 > What loss function is being used ?
 
-The loss functions are the following :
-Notebook A
-Loss Function: Cross-Entropy Loss
+The loss function is the categorical cross-entropy for all experiences :
+
 This loss function is typically used for classification tasks. It measures the difference between predicted class probabilities and the actual class labels.
-
-Notebook B
-Loss Function: Mean Squared Error (MSE)
-This loss function is commonly used for regression tasks. It calculates the average of the squared differences between the predicted values and the actual target values.
-
-Notebook C
-Loss Function: Huber Loss
-This loss function is a combination of Mean Squared Error (MSE) and Mean Absolute Error (MAE). It is robust to outliers while maintaining smooth gradients for optimization.
 
 > Please, give the equation(s)
 
-* Notebook A: Stochastic Gradient Descent (SGD)
-$\\w_{t+1} = w_t - \eta \cdot \nabla L(w_t)\\$
-
-* Notebook B: Adam (Adaptive Moment Estimation)
-
-Update biased first moment (mean) and second moment (uncentered variance) estimates
-$\\\begin{align}
-m_{t+1} = \beta_1 \cdot m_t + (1 - \beta_1) \cdot g_t
-\end{align}\\$
-
-$\\\begin{align}
-v_{t+1} = \beta_2 \cdot v_t + (1 - \beta_2) \cdot g_t^2
-\end{align}\\$
-
-Compute bias-corrected first and second moment estimates
-$\\\begin{align}
-\hat{m}_{t+1} = \frac{m_{t+1}}{1 - \beta_1^{t+1}}
-\end{align}\\$
-
-$\\\begin{align}
-\hat{v}_{t+1} = \frac{v_{t+1}}{1 - \beta_2^{t+1}}
-\end{align}\\$
-
-Update weights
-$\\\begin{align}
-w_{t+1} = w_t - \eta \cdot \frac{\hat{m}_{t+1}}{(\sqrt{\hat{v}_{t+1}} + \epsilon)}
-\end{align}\\$
 
 * Notebook C: RMSProp
 
@@ -138,6 +47,7 @@ v_{t+1} = \beta \cdot v_t + (1 - \beta) \cdot g_t^2
 \end{align}\\$
 
 Update weights
+
 $\\\begin{align}
 w_{t+1} = w_t - \eta \cdot \frac{g_t}{\sqrt{v_{t+1}} + \epsilon}
 \end{align}\\$
@@ -166,31 +76,58 @@ Then add them up = 200 175 + 2560 = 202 735 weights overall
 
 > Test of different cases :
 
+#### Here is the results of the first try :
+
+For the first try we decided to increase the number of neurons from 3 to 200 and change the sigmoid to tanh to see if we can obtain a better network. We will work from now on with 10 epochs since we think the network can probably benefits from more epochs to find a bette minima.
+
+Wi did not add Dropout layer yet. We see the plot looks not bad at all with overall 159 010 parameters. Furthermore we can say the model after 4 epochs is getting overfitted since the loss on the test set is higher than on the dataset.
+
+Nevertheless we get away with an accuracy 97.9 % so a good first shoot.
+
+<div style="text-align:center">
+    <img src="./assets/raw_plot_first.png" alt="raw_plot_first.png" style="width: 90%;">
+</div>
+<div style="text-align:center">
+    <img src="./assets/raw_matrix_first.png" alt="raw_matrix_first.png" style="width: 90%;">
+</div>
+
+
+#### Here is the results of the second try :
+
+We wanted to experiment with an exotic activation function like leaky relu. So we added it to our configuration.
+
+We left 200 neurons to mitigate overfitting from the first try and added a dropout layer of 0.2.
+
+<div style="text-align:center">
+    <img src="./assets/raw_plot_sec.png" alt=" .png" style="width: 90%;">
+</div>
+<div style="text-align:center">
+    <img src="./assets/raw_matrix_sec.png" alt=" .png" style="width: 90%;">
+</div>
+
+We did not obtain an overfitting this time but the plot looks like at beginning the test set is easier to predict. As we progress, the model is getting closer to the performance of the train set (epoch = 8). We reach a good convergence and the model looks like it is starting to be stable. We may benefit from setting more epochs.
+
+We are close to the previous accuracy 97.9 % with 97.7 %
+
+#### Last and third try
+
 After several experiments we decided to go for the following topology with a _relu_ activation on the output layer:
+
+We tested with :
+
+    - no dropout layer -> 98 %
+    - with 300 neurons in the hidden layer -> 97.8 %
+    - with tanh activation on the hidden layer -> 96.4 %
+    - with 240 neurons in the hidden layer -> 98.2 %
 
 <div style="text-align:center">
     <img src="./assets/raw_topology.png" alt="raw_topology.png" style="width: 90%;">
 </div>
 
-This topology allows us to reach an accuracy of about 98.3%
+This topology allows us to reach an accuracy of about 98.3%.
 
-We tested with :
+We obtained a loss value for the test set of 0.062 and an accuracy of 98.2 % for the selected model:
 
-#!!!TODO ajouter les graphes des configs qui ne marchent pas !!!
-
-    - no dropout layer  -> 98 %
-    - with 300 neurons in the hidden layer -> 97.8 %
-    - with dropout 0.3 -> 98 %
-    - with tanh activation on the output layer -> 97.7 %
-    - with 240 neurons in the hidden layer -> 98.2 %
-
-Those trials showed us that here, the simpler the architecture is the better it performs.
-
-
-
-> analysis of this shallow network from raw data :
-
-We obtained a loss value for the test of 0.062 and an accuracy of 98.2 % for the selected model:
 
 <div style="text-align:center">
     <img src="./assets/raw_plot.png" alt="raw_plot.png" style="width: 90%;">
@@ -200,19 +137,8 @@ We obtained a loss value for the test of 0.062 and an accuracy of 98.2 % for the
     <img src="./assets/raw_matrix.png" alt="raw_matrix.png" style="width: 90%;">
 </div>
 
-Here is the results of the first try :
-
-![image]
-![image]
-![image]
-
-
-Here is the results of the second try :
-
-![image]
-![image]
-![image]
-
+Those trials showed us that here, the simpler the architecture is, the better it performs.
+Again we think we got a little overfitted here too. The plot seems to decrease steadily and converging well at the beginning. Conversely at epoch = 4 we see little 'hill' on the test set. We think at this time the model starts to over learn the train set. Furthermore a gap is appearing and increasing between both curves.
 
 
 
@@ -442,14 +368,14 @@ array([[ 978,    0,    0,    1,    0,    0,    0,    0,    1,    0],
 
 > analysis of this CNN for digit recognition :
 
-The CNN achieved a test score of 0.0205 and a test accuracy of 0.9937, indicating exceptional performance in digit recognition. The network architecture consists of two convolutional layers followed by max-pooling layers to extract features from input images. The features are then flattened and processed through a dropout layer to prevent overfitting. Finally, a dense layer with 10 neurons is utilized for classification. With a total of 50,186 parameters, the model demonstrates both high accuracy and efficiency in parameter usage, showcasing its effectiveness in recognizing digits from images.
+The CNN achieved a test score of 0.0205 and a test accuracy of 0.9937, indicating exceptional performance in digit recognition. The network architecture consists of two convolution layers followed by max-pooling layers to extract features from input images. The features are then flattened and processed through a dropout layer to prevent overfitting. Finally, a dense layer with 10 neurons is utilized for classification. With a total of 50,186 parameters, the model demonstrates both high accuracy and efficiency in parameter usage, showcasing its effectiveness in recognizing digits from images.
 
 ## CNN and their weights
 
 > The CNNs models are deeper (have more layers), do they have more weights than the
 > shallow ones? explain with one example.
 
-To obtain an equivalent performance score the normal MLP needed much more neurones, so much more weight compaired to the CNN model.
+To obtain an equivalent performance score the normal MLP needed much more neurones, so much more weight compared to the CNN model.
 
 Example: 
 - Our CNN model in test number 3, obtain a score of 98% accuracy with less than 3'000 weights.
@@ -460,3 +386,26 @@ Example:
 > Train a CNN for the chest x-ray pneumonia recognition. In order to do so, complete the
 > code to reproduce the architecture plotted in the notebook. Present the confusion matrix,
 > accuracy and F1-score of the validation and test datasets and discuss your results.
+
+
+We have in our train set 3876 samples for pneumonia class and 1342 samples for the normal class.
+In our validation set we have 9 samples for each class. The test set has around 1300 samples for both classes.
+What we observe when we plot the test and validation set is the sensitivity og the model at each deviation of the validation set. Because we have so few images, at each variation the model wil turn out unsteady in the loss as well as in the accuracy plot.
+
+
+<div style="text-align:center">
+    <img src="./assets/pneu_loss.png" alt="pneu_loss.png" style="width: 80%;">
+</div>
+
+
+
+<div style="text-align:center">
+    <img src="./assets/pneu_accu.png" alt="pneu_accu.png" style="width: 80%;">
+</div>
+
+Albeit the model is unstable we still achieve a pretty high accuracy I.E ~95~ %
+
+
+
+
+
