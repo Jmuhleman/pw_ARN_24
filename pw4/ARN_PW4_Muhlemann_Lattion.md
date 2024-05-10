@@ -1,5 +1,5 @@
 # **Deep neural networks**
-# **Practical work #04**
+# **Practical work #4**
 
 **Class : Artificial Neural Network ARN**<br>
 **Professor :** Andres Perez-Uribe <br>
@@ -11,6 +11,7 @@
 ## Introduction
 
 
+In this practical work, we explore various neural network architectures and learning algorithms to address digit recognition and pneumonia detection from chest X-rays. We use the MNIST dataset for digit classification and a CNN for chest X-ray pneumonia recognition. RMSprop is chosen as the optimization algorithm, and categorical cross-entropy is used as the loss function. Through multiple experiments, we analyze the impact of network architecture on performance and evaluate the results through confusion matrices, accuracy, and F1-scores.
 
 
 ## Overall description
@@ -21,37 +22,67 @@
 
 The learning algorithm used in all three experiences is root mean square propagation (RMSprop) :
 
-An adaptive learning rate optimizer. It maintains a moving average of the squares of gradients and adjusts the learning rate accordingly. This helps prevent large gradients from causing instability during training. It handles noisy gradients well and according to our researches it can converge faster than stochastic gradient descent.
+An adaptive learning rate optimizer. It maintains a moving average of the squares of gradients and adjusts the learning rate accordingly. This helps prevent large gradients from causing instability during training. It handles noisy gradients well and according to our researches it can converge faster than stochastic gradient descent. Performs well on complex dataset may be interesting for the pneumonia dataset.
 
 > What are the parameters (arguments) being used by that algorithm?
 
-The following parameters had been used for each algorithms :
+The following parameters are being used by the RMSprop algorithm :
 
+- learning_rate: Determines the size of the step taken to update weights in each iteration. Typically set to a small value (e.g., 0.001).
+- rho: The decay rate for moving average of squared gradients. Usually set to 0.9.
+- epsilon: A small constant added to avoid division by zero. Common values are 1e-7.
+- centered: When set to True, it uses the centered RMSprop which keeps a moving average of gradients as well.
+- weight_decay: A regularization parameter that prevents weights from growing too large.
+- clipnorm: Clips gradients to a specific norm.
+- clipvalue: Clips gradients by value.
+- global_clipnorm: Clips gradients globally (across all gradients) by norm.
+- use_ema: Whether to use exponential moving averages for weights.
+- ema_momentum: Momentum used for exponential moving averages.
+- ema_overwrite_frequency: Frequency at which EMA weights are written back to the original weights.
+- loss_scale_factor: Factor used to scale the loss, typically for handling mixed precision training.
 
 
 
 > What loss function is being used ?
 
-The loss function is the categorical cross-entropy for all experiences :
+The loss function is the categorical cross-entropy for all three experiences :
 
 This loss function is typically used for classification tasks. It measures the difference between predicted class probabilities and the actual class labels.
 
 > Please, give the equation(s)
 
 
-* Notebook C: RMSProp
+Here is the update rule for RMSprop:
 
-Update squared gradients' moving average
-$\\\begin{align}
-v_{t+1} = \beta \cdot v_t + (1 - \beta) \cdot g_t^2
-\end{align}\\$
+$$
+\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{E[g^2]_t + \epsilon}} g_t
+$$
 
-Update weights
+where:
+- $\\\theta_{t+1}\\$ is the updated weights,
 
-$\\\begin{align}
-w_{t+1} = w_t - \eta \cdot \frac{g_t}{\sqrt{v_{t+1}} + \epsilon}
-\end{align}\\$
+- $\\\eta\\$ is the learning rate,
 
+- $\\\ E[g^2]_t\\$  is the moving average of squared gradients,
+
+- $\\\epsilon\\$  is a small constant for numerical stability,
+
+- $\\\ g_t\\$ is the gradient at time \( t \).
+
+Here is the categorical cross-entropy loss function equation:
+
+$$
+\text{Cross-entropy} = -\frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{C} y_{ij} \log(p_{ij})
+$$
+
+where:
+- $\\N\\$  is the number of samples,
+
+- $\\C\\$  is the number of classes,
+
+- $\\y_{ij}\\$ is the true label for sample i and class j,
+
+- $\\p_{ij}\\$ is the predicted probability for sample i and class j.
 
 
 ## Shallow network learning from raw data
