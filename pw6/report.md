@@ -1,13 +1,17 @@
 <img src="https://storage.googleapis.com/visual-identity/logo/2020-slim.svg" style="height:80px;"><br><br><br>
 
+<br>
 
 # Object recognition in the wild using Convolution Neural Networks
+<br><br><br>
 
 **Cours : Apprentissage avec des réseaux neuronaux artificiels - ARN**<br>
+**Labo 5 : Transfer learning**<br>
 **Professeur :** Andres Perez-Uribe <br>
 **Assistants :** Shabnam Ataee, Simon Walther <br>
 **Étudiants :** Julien Mühlemann, Lucas Lattion
 
+<!-- pagebreak -->
 
 ## Table des matières
 
@@ -19,9 +23,15 @@
   - [Table des matières](#table-des-matières)
   - [1. Introduction](#1-introduction)
   - [2. Problématique](#2-problématique)
+    - [Classes de détection](#classes-de-détection)
+    - [Base de données](#base-de-données)
+    - [Exemples d'images](#exemples-dimages)
   - [3. Préparation des données](#3-préparation-des-données)
+    - [Prétraitement](#prétraitement)
+    - [Augmentation des données](#augmentation-des-données)
   - [4. Création du modèle](#4-création-du-modèle)
     - [4.1 Architecture](#41-architecture)
+      - [4.1.1 Model Summary](#411-model-summary)
     - [4.2 Transfer learning](#42-transfer-learning)
   - [5. Résultats](#5-résultats)
   - [6. Conclusion](#6-conclusion)
@@ -34,38 +44,90 @@
 
 Dans le cadre de ce laboratoire, nous allons suivre toutes les étapes nécessaires pour créer une application de classification d’objets. Pour ce faire, nous avons réfléchi à ce qu'il serait utile de classifier et avons décidé de nous concentrer sur les différents billets de banque suisses.
 
-En plus de nous offrir une première expérience du transfert de l’apprentissage (transfer learning), une telle application pourrait permettre la mise en place de systèmes de reconnaissance automatique pour des raisons de sécurité ou d’analyse financière, et même aider les amateurs de numismatique à identifier les différents billets en circulation en Suisse.
+En plus de nous offrir une première expérience du transfert de l’apprentissage (transfer learning), une telle application pourrait permettre la mise en place de systèmes de reconnaissance automatique pour des raisons de sécurité, une aide pour les personnes mal-voyantes, et aussi amuser les amateurs de numismatique à identifier les différents billets en circulation en Suisse.
 
-En nous basant sur un dataset préexistant, retravaillé pour correspondre à nos besoins, et sur des photos prises par nos soins, nous allons appliquer le transfert de l’apprentissage à l’aide de MobileNetV2 sur les poids d'ImageNet dont les couches sont figées. Nous procéderons ensuite au peaufinage du modèle afin d’obtenir les meilleurs résultats possibles avec notre dataset.
+Nous découvrirons également l'apprentissage par transfert en utilisant un modèle MobileNetV2 pré-entraîné et en ajoutant nos propres couches par-dessus. Pour comprendre quelles régions des images sont principalement utilisées par le classificateur à base de réseau neuronal pour effectuer une prédiction, nous visualiserons les images et une sorte de “carte thermique” appelée Carte d'Activation de Classe (CAM).
 
 ## 2. Problématique
 Nous étions initialement partis dans l’idée de différencier les billets de banque internationaux, avant de nous rendre compte de la complexité de la collecte de telles données. En effet, outre le grand nombre de devises, plusieurs d’entre elles présentent des similitudes frappantes, rendant une telle classification très difficile pour une première expérience du transfert de l’apprentissage.
 
-Nous avons donc choisi de nous concentrer sur les différents types de billets de banque suisses. Chaque billet possède des caractéristiques reconnaissables, suivant les éléments graphiques et les couleurs spécifiques à chaque dénomination. Une illustration des billets sélectionnés se trouve dans la figure 1.
+Nous avons donc choisi de nous concentrer sur les différents types de billets de banque suisses. Chaque billet possède des caractéristiques reconnaissables, suivant les éléments graphiques et les couleurs spécifiques à chaque dénomination. Une illustration de tout les billets Suisse, se présente ci-dessous: 
 
-Après plusieurs recherches sur internet, nous avons trouvé des datasets existants pour la classification des billets de banque et nous en avons utilisé un provenant de Kaggle, offrant une séparation des images par type de billet. Ce dataset, basé sur le dataset de Swiss Banknotes Dataset, contient plus de 8’000 images réparties en plusieurs classes, dont celles de notre sélection. Le nombre d’images de ce dataset pour nos classes varie entre 250 et 1’400 images. Nous avons donc conservé uniquement une partie d’elles afin d’équilibrer et de réduire le dataset que nous allons utiliser.
+@import "./img/Tout_les_billets_CH.png"
+
+### Classes de détection
+Nous avons choisi les classes suivantes pour notre projet :
+- Billet de 10 CHF
+- Billet de 20 CHF
+- Billet de 50 CHF
+- Billet de 100 CHF
+
+### Base de données
+Nous avons collecté des images pour chacune de ces classes. Le jeu de données contient un nombre équilibré d'images par classe. Voici une répartition des images par classe :
+
+@import "./img/Nombre_Echantillons_Par_Classe.png"
+
+### Exemples d'images
+Voici quelques exemples d'images de notre jeu de données :
+
+@import "./img/Quelques_Echantillons_Billet_CH.png"
 
 ## 3. Préparation des données
 Lors de la sélection des photos pour notre ensemble de données, nous avons conservé les photos ayant peu d’éléments perturbateurs en arrière-plan, comme d’autres objets ou des inscriptions.
 
-Nous avons également essayé de mélanger différentes séries de billets, pour que le modèle ait une meilleure chance de reconnaître les caractéristiques spécifiques à chaque type de billet. Nous avons sélectionné aléatoirement 20 % des images pour notre ensemble de test, et les 80 % restants pour l’entraînement. Les images d’entraînement auront un traitement additionnel pour ajouter des variations, que notre ensemble de validation n’aura pas.
+Nous avons également essayé de mélanger différentes séries de billets, pour que le modèle ait une meilleure chance de reconnaître les caractéristiques spécifiques à chaque type de billet. Nous avons sélectionné aléatoirement 1/3 des images pour notre ensemble de test, et les 2/3  restants pour l’entraînement. 
 
-Pour introduire des variations dans les données, nous avons appliqué des effets de miroir, de contraste, de zoom et de rotations à une partie des images de test. Nos images n’étant pas nécessairement uniformes, ces modifications apportent toutefois une possibilité au modèle de se concentrer sur les éléments des billets qui caractérisent leur type, au lieu de se concentrer uniquement sur les formes et les couleurs. Toutes les images sont redimensionnées au format 224x224 pixels pour avoir une taille uniforme en entrée du modèle.
+### Prétraitement
+Les images sont redimensionnées et normalisées pour être compatibles avec le modèle MobileNetV2 :
+
+```python
+from tensorflow.keras.layers import Resizing, Rescaling
+from tensorflow.keras import Sequential
+
+IMG_HEIGHT = 224
+IMG_WIDTH = 224
+
+image_preprocesses = Sequential([
+    Resizing(IMG_HEIGHT, IMG_WIDTH, crop_to_aspect_ratio=True),
+    Rescaling(1. / 255)
+])
+```
+
+### Augmentation des données
+Pour augmenter la diversité de notre jeu de données, nous avons appliqué des transformations aléatoires comme des retournements horizontaux et des rotations :
+
+```python
+from tensorflow.keras.layers import RandomFlip, RandomRotation
+
+image_augmentations = Sequential([
+    RandomFlip("horizontal"),
+    RandomRotation(0.1),
+])
+```
 
 ## 4. Création du modèle
 ### 4.1 Architecture
-Notre modèle utilise MobileNetV2 avec les poids d’ImageNet, sur lequel nous allons rajouter une couche dense de 128 neurones qui sera la seule couche paramétrable, les couches de MobileNetV2 restant figées. Étant donné l’ensemble de caractéristiques importantes dans les photos du dataset, nous avons fait le choix d’ajouter une régularisation L1 et L2, respectivement lasso regression et ridge regression, sur notre unique couche dense en sortie de MobileNetV2. Cet effet additionnel sur la fonction de coût aide le modèle à éliminer certaines caractéristiques inutiles à la classification, tout en limitant le risque d’overfitting.
 
-Nous avons effectué quelques essais avec notre ensemble de données en introduisant certaines variations dans les hyper-paramètres pour trouver un modèle optimal. Le modèle suivant a été sélectionné :
+1. **MobileNetV2 comme base**
+   - Nous avons utilisé MobileNetV2 comme base, sans inclure la couche de classification finale (`include_top=False`). Cela signifie que nous avons uniquement utilisé les couches convolutionnelles de MobileNetV2, qui sont responsables de l'extraction des caractéristiques des images.
 
-Nombre d’epochs : 8.
-Optimizer : RMSprop conservé du modèle fourni dans la première partie.
-Learning rate : 0.001 (par défaut pour RMSprop).
-Couches denses : 1 couche avec 128 neurones et une régularisation L1 et L2.
-Fonction d’activation : ReLU.
-La performance de l’entraînement est illustrée dans la figure 4. Nous avons noté un certain overfitting dans les dernières epochs, que nous avons cherché à réduire en ajoutant de la régularisation L1 et L2, ainsi qu’en introduisant un effet dropout après notre couche dense en sortie du modèle. Cela a bien aidé la précision, bien que cela ait introduit une variation plus élevée dans les résultats de la fonction de coût. Les expériences suivantes sur ce modèle restant quand même satisfaisantes, et compte tenu de la difficulté de notre choix initial, nous avons décidé que ce modèle serait suffisant.
+2. **Couches ajoutées**
+   - **GlobalAveragePooling2D** : Cette couche effectue un pooling global moyen sur les cartes de caractéristiques issues de MobileNetV2. Cela réduit chaque carte de caractéristiques à un seul nombre, créant ainsi un vecteur de caractéristiques de taille fixe, indépendamment de la taille des cartes de caractéristiques.
+   - **Dense (100 unités, activation 'relu')** : Cette couche dense entièrement connectée comporte 100 unités et utilise la fonction d'activation ReLU (Rectified Linear Unit). Elle introduit une non-linéarité et permet au modèle d'apprendre des combinaisons complexes de caractéristiques.
+   - **Dropout (0.7)** : La couche Dropout est utilisée pour régulariser le modèle et prévenir le surapprentissage. Elle désactive de manière aléatoire 70% des unités de la couche précédente à chaque étape d'entraînement.
+   - **Dense (nombre de classes, activation 'softmax')** : La dernière couche dense comporte autant d'unités que de classes dans notre jeu de données et utilise la fonction d'activation softmax. Cette couche produit une probabilité pour chaque classe, indiquant la probabilité que l'image d'entrée appartienne à chaque classe.
 
-Ce modèle possède un total de 2,422,468 paramètres, dont seulement 164,484 sont entraînables, le reste étant les poids du modèle ImageNet.
+3. **Compilation du modèle**
+   - **Optimizer** : Nous avons utilisé l'optimiseur RMSprop, connu pour son efficacité dans le traitement des grands jeux de données.
+   - **Loss Function** : La fonction de perte utilisée est `sparse_categorical_crossentropy`, adaptée aux problèmes de classification multi-classes.
+   - **Metrics** : Nous avons utilisé `accuracy` comme métrique pour évaluer les performances du modèle pendant l'entraînement et la validation.
+
+#### 4.1.1 Model Summary
+```
+Total params: 2386488 (9.10 MB)
+Trainable params: 128504 (501.97 KB)
+Non-trainable params: 2257984 (8.61 MB)
+```
 
 ### 4.2 Transfer learning
 Pour effectuer le transfert de l’apprentissage, nous avons utilisé MobileNetV2 avec les poids d’ImageNet. Étant donné la petite taille de notre dataset, tous les paramètres d’ImageNet ont été figés, ne laissant que la couche dense comme étant paramétrable. Notre dataset n’étant toutefois pas totalement similaire aux objets utilisés pour ImageNet, nous aurions probablement pu laisser une partie des paramètres du modèle entraînables, mais nous avons décidé de nous concentrer principalement sur la modification des hyper-paramètres.
@@ -73,22 +135,28 @@ Pour effectuer le transfert de l’apprentissage, nous avons utilisé MobileNetV
 Le transfert de l’apprentissage dans notre cas est très utile. En effet, c’est un moyen efficace d’obtenir un modèle performant capable de différencier certaines caractéristiques d’une photo et d’analyser de manière plus précise un petit ensemble d’images. Un modèle convolutif classique entraîné sur notre dataset aurait donné des résultats de très mauvaise qualité, avec un overfitting inévitable.
 
 ## 5. Résultats
-La performance de l’entraînement est donnée dans la figure 4. La matrice de confusion du système ainsi que les résultats de validation sont dans la figure 5.
+La performance de l’entraînement est donnée dans la figure suivante:
+
+```
+Mean F1 Score across all folds: 0.860
+```
+@import "./img/Matrice_Confustion_Global.png"
+
 
 Comme nous pouvons l’observer, le modèle a plus de difficultés avec les prédictions de certaines classes de billets. Cela semble logique car certaines dénominations peuvent avoir des similarités graphiques. Toutefois, nous sommes plutôt satisfaits de la performance de notre modèle, qui affiche un f-score relativement bon pour plusieurs classes de billets. Cela nous rassure quant à la capacité du modèle à séparer les caractéristiques spécifiques aux différents types de billets.
 
-On note une fonction de coût relativement élevée, probablement due à la régularisation L1 et L2 appliquée dans la couche dense du modèle. Le facteur de différence entre le test et l’entraînement est cependant relativement correct, avec un coût de validation 1.2 fois plus élevé, ce qui n’indique pas nécessairement un overfitting sévère.
 
 En application réelle, le modèle affiche quelques incertitudes, mais une fois la position de la caméra stabilisée, les pourcentages de classification sont relativement stables. Les essais réels ont montré quelques difficultés avec certains types de billets, notamment ceux de petites dénominations souvent confondus avec des billets de dénominations proches.
 
 
 ## 6. Conclusion
-Ce laboratoire a été très intéressant, bien que notre choix de classes ait été probablement trop complexe. Un ensemble de classes plus facile et plus proche des objets reconnus par ImageNet aurait probablement causé moins de problèmes dans la classification. Nous avons rencontré plusieurs difficultés lors de la mise en place du dataset pour obtenir quelque chose d’intéressant pour le modèle, et cela s’est répercuté sur les résultats finaux. Parmi ces difficultés, on retrouve évidemment le choix de nos classes, dont la diversité intra-classe et les similarités inter-classes rendent la classification plus compliquée que si nous avions choisi des objets plus ordinaires.
+Ce laboratoire a été très intéressant. Un ensemble de classes plus facile et plus proche des objets reconnus par ImageNet aurait probablement causé moins de problèmes dans la classification. Nous avons rencontré plusieurs difficultés lors de la mise en place du dataset, il nous a fallu reprendre de nouveau échantillons pour obtenir des résultats intéressant.
 
-Nous sommes toutefois grandement satisfaits des résultats obtenus et pensons que l’expérience nous aura formés sur l’utilisation du transfert de l’apprentissage ainsi que sur l’importance de la sélection initiale des classes et du dataset.
+Nous sommes satisfaits des résultats obtenus et pensons que l’expérience nous aura formés sur l’utilisation du transfert de l’apprentissage ainsi que sur l’importance de la sélection initiale du dataset.
 
 Nous pensons que les résultats valident notre problématique initiale, et, considérant que ImageNet est entraîné sur des objets ordinaires du quotidien, la classification finale est satisfaisante pour une première expérience sur le transfert de l’apprentissage et les réseaux convolutifs complexes.
 
-La classification telle qu’effectuée ici présente des limites. En effet, les types de billets autres que ceux sélectionnés ne pourront pas être classifiés correctement. L’utilisation de ce modèle reste donc restreinte dans l’état actuel. Un travail futur pourrait partir des observations effectuées en incorporant un set de données plus grand et avec un nombre plus élevé de types de billets, en considérant les séries de billets plus récentes, que nous n’avons pas pu inclure dans notre dataset. Il pourrait également être utile de fournir une catégorie supplémentaire « autre » pour les objets qui ne sont pas des billets.
+La classification telle qu’effectuée ici présente des limites. En effet, les types de billets autres que ceux sélectionnés ne pourront pas être classifiés correctement. L’utilisation de ce modèle reste donc restreinte dans l’état actuel. Un travail futur pourrait partir des observations effectuées en incorporant un set de données plus grand et avec un nombre plus élevé de types de billets, que nous n’avons pas pu inclure dans notre dataset. Il pourrait également être utile de fournir une catégorie supplémentaire « autre » pour les objets qui ne sont pas des billets.
 
-En résumé, nous sommes extrêmement satisfaits de nous être engagés dans le développement d’un cycle complet d’une application de classification d’objets. La navigation à travers la procédure complète jusqu’aux évaluations finales sur un appareil mobile nous a éclair
+Ce rapport présente une vue d'ensemble complète de notre approche et des résultats obtenus, fournissant ainsi une base solide pour des améliorations futures.
+
